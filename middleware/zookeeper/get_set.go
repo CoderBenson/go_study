@@ -105,6 +105,17 @@ func childw(path string) ([]string, <-chan zk.Event, error) {
 	return cs, csChann, err
 }
 
+func delete(path string) (string, error) {
+	conn := ObtainConn()
+	defer RecycleConn(conn)
+	old, state, err := conn.Get(path)
+	if err != nil {
+		return "", err
+	}
+	err = conn.Delete(path, state.Version)
+	return string(old), err
+}
+
 const (
 	Operate_Create = "create"
 	Operate_Get    = "get"
@@ -114,6 +125,7 @@ const (
 	Operate_Existw = "existw"
 	Operate_Child  = "child"
 	Operate_Childw = "childw"
+	Operate_Delete = "delete"
 )
 
 func main() {
@@ -210,6 +222,13 @@ func main() {
 					fmt.Printf("get %s child from zookeeper channel watch:%v\n", *pathStr, cs)
 				}
 			}
+		}
+	case Operate_Delete:
+		old, err := delete(*pathStr)
+		if err != nil {
+			panic(err)
+		} else {
+			fmt.Printf("delete successful:%s->%s\n", *pathStr, old)
 		}
 	default:
 		panic(fmt.Errorf("%s operate not support", *operateStr))
