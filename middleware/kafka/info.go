@@ -5,19 +5,8 @@ import (
 )
 
 func Info() {
-	brokerInfos, err := GetBrokders(ZKAdd)
-	if err != nil {
-		logger.Fatal(err)
-	}
-	if len(brokerInfos) == 0 {
-		logger.Error("cannot get any brokder")
-	}
-	adds := make([]string, 0, len(brokerInfos))
-	for _, b := range brokerInfos {
-		adds = append(adds, b.Addr())
-	}
 
-	client, err := NewClient(adds...)
+	client, err := NewClientFromZK(ZKAdd)
 	if err != nil {
 		logger.Fatal(err)
 	}
@@ -35,5 +24,5 @@ func Info() {
 	if err != nil {
 		logger.Fatal(err)
 	}
-	logger.Printf("client(%s) has brokers:%v, has topics:%v\n", brokerInfos[0].Addr(), brokersName, topics)
+	logger.Printf("client has brokers:%v, has topics:%v\n", brokersName, topics)
 }

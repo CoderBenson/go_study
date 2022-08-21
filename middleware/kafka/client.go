@@ -14,6 +14,21 @@ func NewClient(add ...string) (sarama.Client, error) {
 	return sarama.NewClient(add, config)
 }
 
+func NewClientFromZK(zkAddr string) (sarama.Client, error) {
+	brokerInfos, err := GetBrokders(zkAddr)
+	if err != nil {
+		logger.Fatal(err)
+	}
+	if len(brokerInfos) == 0 {
+		logger.Error("cannot get any brokder")
+	}
+	adds := make([]string, 0, len(brokerInfos))
+	for _, b := range brokerInfos {
+		adds = append(adds, b.Addr())
+	}
+	return NewClient(adds...)
+}
+
 type Brokder struct {
 	Id   string
 	Host string
